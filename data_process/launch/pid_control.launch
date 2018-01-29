@@ -1,0 +1,8 @@
+<launch>
+  <node name="pid_control" pkg="data_process" type="pid_cotrol.py" output="screen">
+  </node>
+
+  <node name="offboard_node" pkg="offboard" type="offboard_node" output="screen">
+  </node>
+
+</launch>

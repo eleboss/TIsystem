@@ -1,0 +1,38 @@
+<launch>
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain"
+      name="laser_filter">
+    <rosparam command="load" file="$(find data_process)/launch/data_process_config.yaml" />
+    <remap from="/scan" to="/laser/scan" />
+  </node>
+    <node pkg="tf" type="static_transform_publisher"
+      name="tf_ground" args="0 0 0 0 0 0 rplidar_link iris_rplidar::iris::base_link 100">
+  </node>
+  <node pkg="rviz" type="rviz"
+      name="rviz" required="True">
+  </node>
+
+  <node pkg="data_process" type="scantocloud" name="scantocloud_node" >
+  </node>
+
+  <node name="line_extractor" pkg="laser_line_extraction" type="line_extraction_node" output="screen">
+    <param name="~frequency" value="30.0" />
+    <param name="~frame_id" value="rplidar_link" />
+    <param name="~scan_topic" value="/scan_filtered" />
+    <param name="~publish_markers" value="true" />
+    <param name="~bearing_std_dev" value="1e-5" />
+    <param name="~range_std_dev" value="0.012" />
+    <param name="~least_sq_angle_thresh" value="0.0001" />
+    <param name="~least_sq_radius_thresh" value="0.0001" />
+    <param name="~max_line_gap" value="0.5" />
+    <param name="~min_line_length" value="0.7" />
+    <param name="~min_range" value="0.5" />
+    <param name="~min_split_dist" value="0.04" />
+    <param name="~outlier_dist" value="0.06" />
+    <param name="~min_line_points" value="10" />
+  </node>
+
+  <node pkg="uvc_camera" type="uvc_camera_node" name="uvc_camera_node" >
+  </node>
+
+
+</launch>
