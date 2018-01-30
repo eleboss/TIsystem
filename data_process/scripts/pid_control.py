@@ -54,6 +54,7 @@ def PIDinit():
     pid_z = PID.PID(P_z, I_z, D_z)
     pid_yaw = PID.PID(P_yaw, I_yaw, D_yaw)
 
+    #控制频率根据不同的node的速率来设定，ukf和odom的反馈都能达到200HZ，但是PID控制周期是依据OFFBOARD刷新频率确定的也就是100HZ
     pid_x.setSampleTime(0.01)
     pid_y.setSampleTime(0.01)
     pid_z.setSampleTime(0.01)
@@ -140,11 +141,13 @@ def callback_pid(pose):
     setpoint.y = output_y
     setpoint.z = output_z
     stamp = rospy.get_rostime()
+    #使用新的msg，px4的大佬专门为了高级控制定制的
     msg = PositionTarget(coordinate_frame=PositionTarget.FRAME_LOCAL_NED,
                              type_mask=PositionTarget.IGNORE_PX + PositionTarget.IGNORE_PY + PositionTarget.IGNORE_PZ +
                                        PositionTarget.IGNORE_AFX + PositionTarget.IGNORE_AFY + PositionTarget.IGNORE_AFZ +
                                        PositionTarget.IGNORE_YAW_RATE,
                              velocity=setpoint, 
+                             #加不加初始角还不确定，加初始角容易出现固定偏差，减去pi/2是因为会发生偏转
                              yaw = feedback_yaw + output_yaw - np.pi/2 )
     msg.header.stamp = stamp
     position_pub.publish(msg)
@@ -223,7 +226,7 @@ def callback_line(line):
                 right_surface_start = np.vstack((right_surface_start,start[i,:]))
                 right_surface_end = np.vstack((right_surface_end,end[i,:]))
                 right_surface_angle = np.vstack((right_surface_angle,angle[i]))
-
+    #去掉之前放上去的0
     left_surface_start = np.delete(left_surface_start,0,0) 
     left_surface_end = np.delete(left_surface_end,0,0) 
     left_surface_angle = np.delete(left_surface_angle,0,0) 
@@ -244,6 +247,7 @@ def callback_line(line):
     #print "right_line_length",right_line_length
     pLeftLongest = np.argmax(left_line_length)
     pRightLongest = np.argmax(right_line_length)
+    #可能出现丢线bug
     total_distance = abs((left_surface_start[pLeftLongest, 0] + left_surface_end[pLeftLongest, 0]) / 2) + abs((right_surface_start[pRightLongest, 0] + right_surface_end[pRightLongest, 0]) / 2) 
     #print total_distance
     while InitMin == True:
@@ -257,6 +261,7 @@ def callback_line(line):
     if cosyaw <= 1 and cosyaw >=-1:
         dyaw = np.arccos(min_distance / total_distance )
     #print dyaw
+    #设定一个阀值，让小数据变化不会被错认为面改变
     if d_distance < -0.02:
         min_distance = total_distance
         print "NARROW FOUND !"

@@ -19,7 +19,7 @@ public:
   LaserScanToPointCloud(ros::NodeHandle n) : 
     n_(n),
     laser_sub_(n_, "scan_filtered", 10),
-    laser_notifier_(laser_sub_,listener_, "iris_rplidar::iris::base_link", 10)
+    laser_notifier_(laser_sub_,listener_, "base_link", 10)
   {
     laser_notifier_.registerCallback(
       boost::bind(&LaserScanToPointCloud::scanCallback, this, _1));
@@ -33,7 +33,7 @@ public:
     try
     {
         projector_.transformLaserScanToPointCloud(
-          "iris_rplidar::iris::base_link",*scan_in, cloud,listener_);
+          "base_link",*scan_in, cloud,listener_);
     }
     catch (tf::TransformException& e)
     {

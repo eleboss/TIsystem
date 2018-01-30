@@ -38,12 +38,9 @@ pc_y = []
 
 laser_position = []
 odom_position = []
-gazebo_position = []
-
 fusion_position = []
 
 odom_x = odom_y = odom_z = 0
-gazebo_x = gazebo_y = gazebo_z = 0
 laser_x = 0
 laser_y = 0
 laser_z = 31
@@ -51,7 +48,6 @@ fuse_x = fuse_y = fuse_z = 0
 top = 0
 
 odom_sec = odom_nsec = 0
-gazebo_sec = gazebo_nsec = 0
 laser_sec = laser_nsec = 0
 fuse_sec = fuse_nsec = 0
 odom_time = gazebo_time = laser_time =  fuse_time = 0.0
@@ -185,23 +181,23 @@ def callback_laser(laser):
             h = pc_y[i]
             laser_z = h - top
 
-    #dump data  跑的时候可以注释掉
-    laser_position.append([laser_time, laser_x, laser_y, laser_z, top])
-    laser_data_number = laser_data_number + 1
-    #print "Laser processing:", laser_data_number
-    if dumpdata == True:
-        if laser_data_number == 600:
-            laser_file=open('/home/eleboss/data/laser.p', 'wb')
-            pickle.dump(laser_position, laser_file)
-            laser_file.close()
-            print("LIDAR Reach 1k2 data")
+    # #dump data  跑的时候可以注释掉
+    # laser_position.append([laser_time, laser_x, laser_y, laser_z, top])
+    # laser_data_number = laser_data_number + 1
+    # #print "Laser processing:", laser_data_number
+    # if dumpdata == True:
+    #     if laser_data_number == 600:
+    #         laser_file=open('/home/eleboss/data/laser.p', 'wb')
+    #         pickle.dump(laser_position, laser_file)
+    #         laser_file.close()
+    #         print("LIDAR Reach 1k2 data")
 
     #print "1:", laser_y ,laser_z
 
     
 
 def callback_odom(odom):
-    global odom_data_number, odom_roll, odom_pitch, odom_yaw, odom_position, gazebo_position, gazebo_x, gazebo_y, gazebo_z, gazebo_qx, gazebo_qy, gazebo_qz, gazebo_qw
+    global odom_data_number, odom_roll, odom_pitch, odom_yaw, odom_position, gazebo_position
     global dumpdata, laser_time, laser_y, laser_z, fuse_x, fuse_y, fuse_z, odom_fusion, top, last_laser_time, last_odom_vely, last_odom_velz
     position_fusion = Odometry()
     #Time record
@@ -271,49 +267,28 @@ def callback_odom(odom):
     #                 'rplidar_link',
     #                 "world")
 
-    #dump data 跑的时候可以注释掉
-    fusion_position.append([odom_time, fuse_x, odom_velx, fuse_y, odom_vely, fuse_z, odom_velz])
-    odom_position.append([odom_time, odom_x, odom_y, odom_z, odom_roll, odom_pitch, odom_yaw, odom_velx, odom_vely, odom_velz])
-    gazebo_position.append([gazebo_time, gazebo_x, gazebo_y, gazebo_z, gazebo_roll, gazebo_pitch, gazebo_yaw])
-    odom_data_number = odom_data_number + 1
-    #print "odom processing:",odom_data_number
-    if dumpdata == True:
-        if odom_data_number == 3000 :
-            odom_file=open('/home/eleboss/data/odom.p', 'wb')
-            pickle.dump(odom_position, odom_file)
-            odom_file.close()
-            gazebo_file=open('/home/eleboss/data/gazebo.p', 'wb')
-            pickle.dump(gazebo_position, gazebo_file)
-            gazebo_file.close()
-            print("ODOM Reach 3k data")
+    # #dump data 跑的时候可以注释掉
+    # fusion_position.append([odom_time, fuse_x, odom_velx, fuse_y, odom_vely, fuse_z, odom_velz])
+    # odom_position.append([odom_time, odom_x, odom_y, odom_z, odom_roll, odom_pitch, odom_yaw, odom_velx, odom_vely, odom_velz])
+    # gazebo_position.append([gazebo_time, gazebo_x, gazebo_y, gazebo_z, gazebo_roll, gazebo_pitch, gazebo_yaw])
+    # odom_data_number = odom_data_number + 1
+    # #print "odom processing:",odom_data_number
+    # if dumpdata == True:
+    #     if odom_data_number == 3000 :
+    #         odom_file=open('/home/eleboss/data/odom.p', 'wb')
+    #         pickle.dump(odom_position, odom_file)
+    #         odom_file.close()
+    #         gazebo_file=open('/home/eleboss/data/gazebo.p', 'wb')
+    #         pickle.dump(gazebo_position, gazebo_file)
+    #         gazebo_file.close()
+    #         print("ODOM Reach 3k data")
 
 
 
     #print "2", odom_x, odom_y, odom_z
-    #print "GT",gazebo_x, gazebo_y, gazebo_z
-
     #print "odom_yaw:",numpy.degrees(odom_yaw)
-    #print "gazebo_yaw:",numpy.degrees(gazebo_yaw)
-
-def callback_gazebo(gazebo):
-    global gazebo_position, gazebo_x, gazebo_y, gazebo_z, gazebo_qx, gazebo_qy, gazebo_qz, gazebo_qw
-
-    # dump data
-
-    #gazebo_position.append([gazebo.pose[1].position.x,gazebo.pose[1].position.y,gazebo.pose[1].position.z])
-    gazebo_x = gazebo.pose[1].position.x
-    gazebo_y = gazebo.pose[1].position.y
-    gazebo_z = gazebo.pose[1].position.z
-
-    gazebo_qx = gazebo.pose[1].orientation.x
-    gazebo_qy = gazebo.pose[1].orientation.y
-    gazebo_qz = gazebo.pose[1].orientation.z
-    gazebo_qw = gazebo.pose[1].orientation.w
 
 
-    # rospy.loginfo("I heard Gazebo")
-
-    # print roll,pitch,yaw
 
 
 rospy.init_node('data_process')
@@ -321,7 +296,7 @@ rospy.init_node('data_process')
 subcloud = rospy.Subscriber('/point_cloud', PointCloud, callback_cloud)
 sublaser = rospy.Subscriber('/scan_filtered', LaserScan, callback_laser)
 subodom = rospy.Subscriber('/mavros/local_position/odom', Odometry, callback_odom)
-subogazebo = rospy.Subscriber('/gazebo/model_states', ModelStates, callback_gazebo)
+
 pub = rospy.Publisher('/position_fusion', Odometry, queue_size=0)
 
 rospy.spin()
