@@ -19,8 +19,8 @@ int main(int argc, char **argv)
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, state_cb);
-    ros::Publisher setpoint_PID = nh.advertise<geometry_msgs::PoseStamped>
-            ("setpoint_PID", 10);
+    // ros::Publisher setpoint_PID = nh.advertise<geometry_msgs::PoseStamped>
+    //         ("setpoint_PID", 10);
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);
     //ros::Publisher local_vel_pub = nh.advertise<geometry_msgs::TwistStamped>
@@ -39,11 +39,11 @@ int main(int argc, char **argv)
         rate.sleep();
     }
 
-    geometry_msgs::PoseStamped pose;
-    pose.pose.position.x = 0;
-    pose.pose.position.y = 1;
-    pose.pose.position.z = 8;
-    pose.pose.orientation.z = 0;
+    // geometry_msgs::PoseStamped pose;
+    // pose.pose.position.x = 0;
+    // pose.pose.position.y = 1;
+    // pose.pose.position.z = 8;
+    // pose.pose.orientation.z = 0;
     
     
     // geometry_msgs::TwistStamped vel;
