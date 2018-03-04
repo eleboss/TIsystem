@@ -293,7 +293,7 @@ def callback_odom(odom):
 
 rospy.init_node('data_process')
 
-subcloud = rospy.Subscriber('/point_cloud', PointCloud, callback_cloud)
+subcloud = rospy.Subscriber('/point_cloud_ori', PointCloud, callback_cloud)
 sublaser = rospy.Subscriber('/scan_filtered', LaserScan, callback_laser)
 subodom = rospy.Subscriber('/mavros/local_position/odom', Odometry, callback_odom)
 
