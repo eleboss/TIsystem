@@ -1,3 +1,4 @@
+#include <string>
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <mavros_msgs/CommandBool.h>
@@ -7,7 +8,7 @@
 #include <math.h>
 
 mavros_msgs::State current_state;
-char swithc_sign = 0;
+flag swithc_sign = 0;
 void state_cb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
 }
@@ -70,7 +71,7 @@ int main(int argc, char **argv)
     ros::Time last_request1 = ros::Time::now();
 
     while(ros::ok()){
-        if( current_state.mode != "GUIDED_NOGPS" &&
+        if( current_state.mode == "GUIDED_NOGPS" &&
             (ros::Time::now() - last_request > ros::Duration(5.0) && swithc_sign == 0)){
             if( set_mode_client.call(offb_set_mode) &&
                 offb_set_mode.response.mode_sent){
@@ -87,6 +88,10 @@ int main(int argc, char **argv)
                 }
                 last_request = ros::Time::now();
             }
+        }
+        if ( current_state.mode != "GUIDED_NOGPS"){
+            swithc_sign == 1;
+            ROS_INFO("Manual control enabled");
         }
         // if(ros::Time::now() - last_request1 > ros::Duration(9999999999)){           
         //     //pose.pose.position.x += 0.01;
