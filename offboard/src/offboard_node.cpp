@@ -1,4 +1,3 @@
-#include <string>
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <mavros_msgs/CommandBool.h>
@@ -8,7 +7,7 @@
 #include <math.h>
 
 mavros_msgs::State current_state;
-flag swithc_sign = 0;
+char swithc_sign = 0;
 void state_cb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
 }
@@ -62,7 +61,7 @@ int main(int argc, char **argv)
     }
 
     mavros_msgs::SetMode offb_set_mode;
-    offb_set_mode.request.custom_mode = "GUIDED_NOGPS";
+    offb_set_mode.request.custom_mode = "OFFBOARD";
 
     mavros_msgs::CommandBool arm_cmd;
     arm_cmd.request.value = true;
@@ -71,26 +70,28 @@ int main(int argc, char **argv)
     ros::Time last_request1 = ros::Time::now();
 
     while(ros::ok()){
-        if( current_state.mode == "GUIDED_NOGPS" &&
-            (ros::Time::now() - last_request > ros::Duration(5.0) && swithc_sign == 0)){
-            if( set_mode_client.call(offb_set_mode) &&
-                offb_set_mode.response.mode_sent){
-                ROS_INFO("GUIDED_NOGPS enabled");
-            }
-            last_request = ros::Time::now();
-        } 
-        else {
-            if( !current_state.armed &&
-                (ros::Time::now() - last_request > ros::Duration(5.0))){
-                if( arming_client.call(arm_cmd) &&
-                    arm_cmd.response.success){
-                    ROS_INFO("Vehicle armed");
+        if(swithc_sign == 0){
+            if( current_state.mode == "OFFBOARD" &&
+                (ros::Time::now() - last_request > ros::Duration(5.0)) && ){
+                if( set_mode_client.call(offb_set_mode) &&
+                    offb_set_mode.response.mode_sent){
+                    ROS_INFO("OFFBOARD enabled");
                 }
                 last_request = ros::Time::now();
+            } 
+            else {
+                if( !current_state.armed &&
+                    (ros::Time::now() - last_request > ros::Duration(5.0))){
+                    if( arming_client.call(arm_cmd) &&
+                        arm_cmd.response.success){
+                        ROS_INFO("Vehicle armed");
+                    }
+                    last_request = ros::Time::now();
+                }
             }
         }
-        if ( current_state.mode != "GUIDED_NOGPS"){
-            swithc_sign == 1;
+        if ( current_state.mode == "STABLIZE" &&){
+            swithc_sign = 1;
             ROS_INFO("Manual control enabled");
         }
         // if(ros::Time::now() - last_request1 > ros::Duration(9999999999)){           
@@ -108,7 +109,7 @@ int main(int argc, char **argv)
         //ROS_INFO_STREAM("HEY \"" << 123);
         //local_pos_pub.publish(pose);
         //local_vel_pub.publish(vel);
-        setpoint_PID.publish(pose);
+        //setpoint_PID.publish(pose);
         
         ros::spinOnce();
         rate.sleep();
