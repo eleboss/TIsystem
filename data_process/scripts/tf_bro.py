@@ -1,4 +1,4 @@
-#!/home/eleboss/anaconda3/envs/py27/bin/python
+#!/usr/bin/python2.7
 import roslib  
 #roslib.load_manifest('learning_tf')  
 import rospy   

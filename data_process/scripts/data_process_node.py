@@ -1,4 +1,4 @@
-#!/home/eleboss/anaconda3/envs/py27/bin/python
+#!/usr/bin/python2.7
 # coding=<encoding name> 例如，可添加# coding=utf-8
 
 #world axis x = tunnel forward; z = vertical; y = horizontal
