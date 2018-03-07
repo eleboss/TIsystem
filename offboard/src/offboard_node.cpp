@@ -81,39 +81,30 @@ int main(int argc, char **argv)
 	//ROS_INFO_STREAM("HEY \"" << current_state.mode);
 	if(swithc_sign == 0)
 	{
-        if( current_state.mode != "OFFBOARD" && (ros::Time::now() - last_request > ros::Duration(5.0)))
+
+        if( current_state.mode == "OFFBOARD" && !current_state.armed && (ros::Time::now() - last_request > ros::Duration(5.0)))
         {
-            if( set_mode_client.call(offb_set_mode) && offb_set_mode.response.mode_sent)
+            if( arming_client.call(arm_cmd) && arm_cmd.response.success)
             {
-                ROS_INFO("OFFBOARD enabled");
+                ROS_INFO("Vehicle armed");
             }
             last_request = ros::Time::now();
-        } 
-            else 
-            {
-                if( current_state.mode == "OFFBOARD" && !current_state.armed && (ros::Time::now() - last_request > ros::Duration(5.0)))
-                {
-                    if( arming_client.call(arm_cmd) && arm_cmd.response.success)
-                    {
-                        ROS_INFO("Vehicle armed");
-                    }
-                    last_request = ros::Time::now();
-                }
-            }
         }
-        if ( current_state.mode == "MANUAL" && swithc_sign!=2)
+            
+    }
+    if ( current_state.mode == "MANUAL" && swithc_sign!=2)
+    {
+        swithc_sign = 1;
+	    if(swithc_sign == 1)
         {
-            swithc_sign = 1;
-	        if(swithc_sign == 1)
+	        if( set_mode_client.call(manu_set_mode) && manu_set_mode.response.mode_sent)
             {
-	            if( set_mode_client.call(manu_set_mode) && manu_set_mode.response.mode_sent)
-                {
-                    ROS_INFO("manu_set_mode enabled");
-		            swithc_sign=2;
-                }
+                ROS_INFO("manu_set_mode enabled");
+	            swithc_sign=2;
             }
-            ROS_INFO("Manual control enabled");
         }
+            ROS_INFO("Manual control enabled");
+    }
         // if(ros::Time::now() - last_request1 > ros::Duration(9999999999)){           
         //     //pose.pose.position.x += 0.01;
         //     pose.pose.position.y -= 1;

@@ -25,6 +25,7 @@
 import rospy 
 import roslib
 import pickle
+import math
 from numpy.random import randn
 import numpy as np
 from filterpy.kalman import UnscentedKalmanFilter as UKF
@@ -33,7 +34,7 @@ from filterpy.common import Q_discrete_white_noise
 from filterpy.kalman import unscented_transform, MerweScaledSigmaPoints
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Odometry
-
+vaild_fuse_x = vaild_fuse_y = vaild_fuse_z = vaild_dyaw = 0
 ukf_result = []
 
 def f_cv(x, dt):
@@ -68,7 +69,7 @@ def UKFinit():
 
 
 def callback_fuse(fuse):
-    global ukf_result,ukf
+    global ukf_result, ukf, vaild_fuse_x, vaild_fuse_y, vaild_fuse_z, vaild_dyaw
     position_ukf = Odometry()
 
     fuse_x = fuse.pose.pose.position.x
@@ -76,6 +77,28 @@ def callback_fuse(fuse):
     fuse_z = fuse.pose.pose.position.z
 
     dyaw = fuse.pose.pose.orientation.z 
+
+    #prevent the data inf and nan. INIT must be vaild data!
+    if math.isinf(fuse_x) or math.isnan(fuse_x):
+        fuse_x = vaild_fuse_x
+    else:
+        vaild_fuse_x = fuse_x
+
+    if math.isinf(fuse_y) or math.isnan(fuse_y):
+        fuse_y = vaild_fuse_y
+    else:
+        vaild_fuse_y = fuse_y
+
+    if math.isinf(fuse_z) or math.isnan(fuse_z):
+        fuse_z = vaild_fuse_z
+    else:
+        vaild_fuse_z = fuse_z
+
+    if math.isinf(dyaw) or math.isnan(dyaw):
+        dyaw = vaild_dyaw
+    else:
+        vaild_dyaw = dyaw
+
 
     odom_velx = fuse.twist.twist.linear.x 
     odom_vely = fuse.twist.twist.linear.y 
@@ -93,7 +116,7 @@ def callback_fuse(fuse):
 #记录数据，发布数据
     #ukf_result.append(np.hstack((fuse_time, ukf.x)))
 
-    position_ukf.header.frame_id = "rplidar_link"
+    position_ukf.header.frame_id = "laser"
     position_ukf.header.stamp.secs = odom_sec
     position_ukf.header.stamp.nsecs = odom_nsec
 

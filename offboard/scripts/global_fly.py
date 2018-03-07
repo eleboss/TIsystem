@@ -18,7 +18,7 @@ theta = 0
 set_position = PoseStamped()
 set_position.pose.position.x = 0
 set_position.pose.position.y = 0
-set_position.pose.position.z = 0
+set_position.pose.position.z = 1
 set_yaw = 0
 wn = 0.03
 
@@ -29,10 +29,10 @@ def callback_odom(pose):
     if counter < 500000 and counter > 450000:
         
         if counter % 200 == 0:
-            set_position.x += 1
-            set_position.y +=0.3
+            set_position.x = 0
+            set_position.y = 0
             set_position.z = 1
-            set_yaw = -1.57
+            set_yaw = 0
         print "random fly ",'X:',set_position.x,'Y:',set_position.y,'Z:',set_position.z
         stamp = rospy.get_rostime()
         set_position.header.stamp = stamp

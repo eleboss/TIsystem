@@ -106,12 +106,6 @@ def callback_cloud(cloud):
     #print "dyaw:", dyaw
 
 
-    # pc_x_sort[-6:-1] = pc_x_sort[-6:-1] * numpy.cos(odom_yaw)
-    # pc_x_sort[0:5] = pc_x_sort[0:5] * numpy.cos(odom_yaw)
-    # pc_y_sort = numpy.sort(pc_y,kind='heapsort')
-    # dx = (numpy.abs(numpy.sum(pc_x_sort[0:5])) / 5 + numpy.abs(numpy.sum(pc_x_sort[-6:-1])) / 5) / 2
-    #print dx,pc_x_sort[0:5] * numpy.cos(odom_yaw),pc_x_sort[0:5],numpy.cos(odom_yaw)
-
     
 def callback_laser(laser):
     #TODO odom_yaw&odom_pitch&odom_roll judgement
@@ -181,18 +175,7 @@ def callback_laser(laser):
             h = pc_y[i]
             laser_z = h - top
 
-    # #dump data  跑的时候可以注释掉
-    # laser_position.append([laser_time, laser_x, laser_y, laser_z, top])
-    # laser_data_number = laser_data_number + 1
-    # #print "Laser processing:", laser_data_number
-    # if dumpdata == True:
-    #     if laser_data_number == 600:
-    #         laser_file=open('/home/eleboss/data/laser.p', 'wb')
-    #         pickle.dump(laser_position, laser_file)
-    #         laser_file.close()
-    #         print("LIDAR Reach 1k2 data")
 
-    #print "1:", laser_y ,laser_z
 
     
 
@@ -251,37 +234,14 @@ def callback_odom(odom):
     position_fusion.twist.twist.linear.y = odom_vely
     position_fusion.twist.twist.linear.z = odom_velz
 
+
+    #TODO 结合光流偏差一起判断雷达对地图的感知是否更新了，目前只做INF保持过滤    
+    
     pub.publish(position_fusion)
 
     #calc the euler angle from quaternion
     qn_odom = [odom.pose.pose.orientation.x, odom.pose.pose.orientation.y, odom.pose.pose.orientation.z, odom.pose.pose.orientation.w]
     (odom_roll,odom_pitch,odom_yaw) = euler_from_quaternion(qn_odom)
-    qn_gazebo = [gazebo_qx, gazebo_qy, gazebo_qz, gazebo_qw]
-    (gazebo_roll,gazebo_pitch,gazebo_yaw) = euler_from_quaternion(qn_gazebo)
-
-    #leave for 3D Point cloud map construct
-    # br = tf.TransformBroadcaster()
-    # br.sendTransform((odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z),
-    #                 qn,
-    #                 rospy.Time.now(),
-    #                 'rplidar_link',
-    #                 "world")
-
-    # #dump data 跑的时候可以注释掉
-    # fusion_position.append([odom_time, fuse_x, odom_velx, fuse_y, odom_vely, fuse_z, odom_velz])
-    # odom_position.append([odom_time, odom_x, odom_y, odom_z, odom_roll, odom_pitch, odom_yaw, odom_velx, odom_vely, odom_velz])
-    # gazebo_position.append([gazebo_time, gazebo_x, gazebo_y, gazebo_z, gazebo_roll, gazebo_pitch, gazebo_yaw])
-    # odom_data_number = odom_data_number + 1
-    # #print "odom processing:",odom_data_number
-    # if dumpdata == True:
-    #     if odom_data_number == 3000 :
-    #         odom_file=open('/home/eleboss/data/odom.p', 'wb')
-    #         pickle.dump(odom_position, odom_file)
-    #         odom_file.close()
-    #         gazebo_file=open('/home/eleboss/data/gazebo.p', 'wb')
-    #         pickle.dump(gazebo_position, gazebo_file)
-    #         gazebo_file.close()
-    #         print("ODOM Reach 3k data")
 
 
 

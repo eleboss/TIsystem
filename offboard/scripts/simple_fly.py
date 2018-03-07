@@ -57,7 +57,7 @@ def callback_odom(pose):
             set_position.x = 0
             set_position.y =0
             set_position.z = 1
-            set_yaw = -1.57
+            set_yaw = 0
         print "random fly ",'X:',set_position.x,'Y:',set_position.y,'Z:',set_position.z
         msg = PositionTarget(coordinate_frame=PositionTarget.FRAME_LOCAL_NED,
                                 type_mask=PositionTarget.IGNORE_VX + PositionTarget.IGNORE_VY + PositionTarget.IGNORE_VZ +
