@@ -9,7 +9,7 @@ scan_filter_chain:
   params:
     use_message_range_limits: false
     lower_threshold: 0.3
-    upper_threshold: 30
+    upper_threshold: 60
     lower_replacement_value: -.inf
     upper_replacement_value: .inf
 
