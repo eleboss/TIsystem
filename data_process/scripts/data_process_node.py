@@ -27,7 +27,6 @@ from sensor_msgs.msg import PointCloud
 from sensor_msgs.msg import LaserScan
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
-from gazebo_msgs.msg import ModelStates
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 
@@ -50,12 +49,10 @@ top = 0
 odom_sec = odom_nsec = 0
 laser_sec = laser_nsec = 0
 fuse_sec = fuse_nsec = 0
-odom_time = gazebo_time = laser_time =  fuse_time = 0.0
+odom_time  = laser_time =  fuse_time = 0.0
 
 odom_roll = odom_pitch = odom_yaw = 0
-gazebo_roll = gazebo_pitch = gazebo_yaw = 0
 
-gazebo_qx = gazebo_qy = gazebo_qz = gazebo_qw = 0
 
 odom_velx = odom_vely = odom_velz = 0.0
 last_odom_velx = last_odom_vely = last_odom_velz = 0
@@ -205,7 +202,7 @@ def callback_laser(laser):
     
 
 def callback_odom(odom):
-    global odom_data_number, odom_roll, odom_pitch, odom_yaw, odom_position, gazebo_position
+    global odom_data_number, odom_roll, odom_pitch, odom_yaw, odom_position
     global dumpdata, laser_time, laser_y, laser_z, fuse_x, fuse_y, fuse_z, odom_fusion, top, last_laser_time, last_odom_vely, last_odom_velz
     position_fusion = Odometry()
     #Time record
@@ -213,9 +210,7 @@ def callback_odom(odom):
     odom_nsec = odom.header.stamp.nsecs
     odom_time = odom_sec + odom_nsec * 10**(-9)
 
-    gazebo_sec = odom_sec
-    gazebo_nsec = odom_nsec
-    gazebo_time = odom_time
+
 
     #rospy.loginfo("I heard Odom")
     #laser_position.append([laser_y,laser_z])
@@ -245,7 +240,7 @@ def callback_odom(odom):
     last_laser_time = laser_time
 
     #发布数据
-    position_fusion.header.frame_id = "rplidar_link"
+    position_fusion.header.frame_id = "laser"
     position_fusion.header.stamp.secs = odom_sec
     position_fusion.header.stamp.nsecs = odom_nsec
 
@@ -260,7 +255,7 @@ def callback_odom(odom):
     position_fusion.twist.twist.linear.z = odom_velz
 
 
-    #TODO 结合光流偏差一起判断雷达对地图的感知是否更新了，目前只做INF保持过滤    
+   
     
     pub.publish(position_fusion)
 
