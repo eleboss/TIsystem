@@ -217,7 +217,8 @@ def callback_line(line):
     for i in range(len(gardient)):
         #judge the left or right surface
         if gardient[i] < 0.02:
-            if abs(angle[i]) > 1.57:
+            # 0度是中点
+            if abs(angle[i]) < 0:
                 left_surface_start = np.vstack((left_surface_start , start[i,:]))
                 left_surface_end = np.vstack((left_surface_end,end[i,:]))
                 left_surface_angle = np.vstack((left_surface_angle,angle[i]))

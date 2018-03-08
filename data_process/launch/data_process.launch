@@ -16,7 +16,7 @@
 
 
   <node name="tf_broadcaster" pkg="data_process" type="tf_bro.py" respawn="false" output="screen" >  
-    <param name="drone" type="string" value="laser" />  
+    <param name="drone" type="string" value="base_link" />  
   </node>  
 
 
@@ -48,5 +48,7 @@
   <node pkg="uvc_camera" type="uvc_camera_node" name="uvc_camera_node" >
   </node>
 
+  <node pkg="tf" type="static_transform_publisher" name="world_to_base" 
+    args="0 0 0.1 0 0 0 /base_link /laser 40" /> 
 
 </launch>

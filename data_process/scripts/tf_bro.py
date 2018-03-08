@@ -8,7 +8,6 @@ from sensor_msgs.msg import PointCloud
 from sensor_msgs.msg import LaserScan
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
-from gazebo_msgs.msg import ModelStates
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 
 ukf_x = ukf_y = ukf_z = 0
