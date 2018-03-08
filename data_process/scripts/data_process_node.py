@@ -63,6 +63,8 @@ record_num = 0
 last_laser_time = 0
 SURFACE_GAP = 0.05  #gap use to seperate the wall and others
 MIDDLE_ANGLE = 0
+MAX_RANGE = 60 #laser max range
+MIN_RANGE = 0.3 #laser min range
 
 laser_data_number = 0
 odom_data_number = 0
@@ -149,7 +151,7 @@ def callback_laser(laser):
     range_project_top = numpy.asarray(range_filtered) * numpy.cos(odom_pitch)
     #find the vertical angle laser
     for i in range(numpy.shape(range_angle_raw)[0]):
-        #vetical = 90 = 1.57
+        #vetical = 0
         if range_angle_raw[i]+odom_roll > MIDDLE_ANGLE -0.05 and range_angle_raw[i]+odom_roll < MIDDLE_ANGLE + 0.05:
             vertical_laser.append(range_project_top[i])
     vertical_laser_sorted = numpy.sort(vertical_laser,kind='heapsort') 
@@ -166,6 +168,12 @@ def callback_laser(laser):
     #sort the project line use the longest, which is the left or right serface distance
     range_project_right_sorted = numpy.sort(range_project_right,kind='heapsort')
     range_project_left_sorted = numpy.sort(range_project_left,kind='heapsort') 
+
+    #fliter the inf and -inf data
+    range_project_right_sorted = range_project_right_sorted[ range_project_right_sorted< MAX_RANGE]
+    range_project_right_sorted = range_project_right_sorted[ range_project_right_sorted> MIN_RANGE]
+    range_project_left_sorted = range_project_right_sorted[ range_project_left_sorted< MAX_RANGE]
+    range_project_left_sorted = range_project_right_sorted[ range_project_left_sorted> MIN_RANGE]
 
     #use a simple gap to find the clusting of 1D data which represent the wall.
     wall_index_left = [0] #start at 0
