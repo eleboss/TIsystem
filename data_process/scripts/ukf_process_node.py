@@ -34,6 +34,8 @@ from filterpy.common import Q_discrete_white_noise
 from filterpy.kalman import unscented_transform, MerweScaledSigmaPoints
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Odometry
+
+last_odom_time = 0
 vaild_fuse_x = vaild_fuse_y = vaild_fuse_z = vaild_dyaw = 0
 ukf_result = []
 
@@ -53,9 +55,9 @@ def h_cv(x):
 def UKFinit():
     global ukf
     ukf_fuse = []
-    std_y, std_z = 0.03, 0.03
-    vstd_y = 0.2
-    vstd_z = 0.2
+    std_y, std_z = 0.01, 0.01
+    vstd_y = 0.1
+    vstd_z = 0.1
     dt = 0.005
 
 
@@ -65,18 +67,22 @@ def UKFinit():
     ukf.R = np.diag([std_y, vstd_y,std_z,vstd_z]) 
     ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2, dt=dt, var=0.2)
     ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2, dt=dt, var=0.2)
-    ukf.P = np.diag([4**2, 1**2, 4**2, 1**2])
+    ukf.P = np.diag([3**2, 0.5, 3**2, 0.5])
 
 
 def callback_fuse(fuse):
-    global ukf_result, ukf, vaild_fuse_x, vaild_fuse_y, vaild_fuse_z, vaild_dyaw
+    global ukf_result, ukf, vaild_fuse_x, vaild_fuse_y, vaild_fuse_z, vaild_dyaw,last_odom_time 
     position_ukf = Odometry()
 
     fuse_x = fuse.pose.pose.position.x
     fuse_y = fuse.pose.pose.position.y
     fuse_z = fuse.pose.pose.position.z
 
-    dyaw = fuse.pose.pose.orientation.z 
+    
+
+    left_line_distance = fuse.pose.pose.orientation.x  #暂时用来放left_line_distance，这个和真实含义不对等
+    right_line_distance = fuse.pose.pose.orientation.y   #暂时用来放right_line_distance，这个和真实含义不对等
+    init_yaw = fuse.pose.pose.orientation.z   #暂时用来放init_yaw，这个和真实含义不对等 
 
     #prevent the data inf and nan. INIT must be vaild data!
     if math.isinf(fuse_x) or math.isnan(fuse_x):
@@ -94,10 +100,6 @@ def callback_fuse(fuse):
     else:
         vaild_fuse_z = fuse_z
 
-    if math.isinf(dyaw) or math.isnan(dyaw):
-        dyaw = vaild_dyaw
-    else:
-        vaild_dyaw = dyaw
 
 
     odom_velx = fuse.twist.twist.linear.x 
@@ -124,7 +126,12 @@ def callback_fuse(fuse):
     position_ukf.pose.pose.position.y = ukf.x[0]
     position_ukf.pose.pose.position.z = ukf.x[2]
 
-    position_ukf.pose.pose.orientation.z = dyaw
+    #only pass the data
+    position_ukf.pose.pose.orientation.x = left_line_distance
+    position_ukf.pose.pose.orientation.y = right_line_distance
+    position_ukf.pose.pose.orientation.z = init_yaw
+
+
 
     position_ukf.twist.twist.linear.x = odom_velx
     position_ukf.twist.twist.linear.y = ukf.x[1]
@@ -132,10 +139,15 @@ def callback_fuse(fuse):
 
     pub.publish(position_ukf)
 #print uxs
+    #print 'IN:',fuse_z,' OUT:',position_ukf.pose.pose.position.z,'Dz:',position_ukf.pose.pose.position.z - fuse_z
+    current_odom_time = odom_sec + odom_nsec*10**-9
+    if current_odom_time - last_odom_time > 0.01:
+        print 'PX4 ODOM speed too LOW!!! Check the mavlink setting! Current frequency:',1 / current_odom_time - last_odom_time
+    last_odom_time = current_odom_time
 
 
 rospy.init_node('ukf_process_node')
 UKFinit()
 position_fusion = rospy.Subscriber('/position_fusion', Odometry, callback_fuse)
-pub = rospy.Publisher('/position_ukf', Odometry, queue_size=0)
+pub = rospy.Publisher('/position_ukf', Odometry, queue_size=1)
 rospy.spin()

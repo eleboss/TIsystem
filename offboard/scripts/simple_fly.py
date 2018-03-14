@@ -1,5 +1,5 @@
 #!/usr/bin/python2.7
-
+# coding=<encoding name> 例如，可添加# coding=utf-8
 
 # Example of vel contorl and position control
 
@@ -38,6 +38,7 @@ set_position.y = 0
 set_position.z = 0
 set_yaw = 0
 wn = 0.03
+setvel = Vector3()
 msg = PositionTarget(coordinate_frame=PositionTarget.FRAME_LOCAL_NED,
                             type_mask=PositionTarget.IGNORE_VX + PositionTarget.IGNORE_VY + PositionTarget.IGNORE_VZ +
                                     PositionTarget.IGNORE_AFX + PositionTarget.IGNORE_AFY + PositionTarget.IGNORE_AFZ +
@@ -46,28 +47,27 @@ msg = PositionTarget(coordinate_frame=PositionTarget.FRAME_LOCAL_NED,
                             yaw = set_yaw )
 
 def callback_odom(pose):
-    global r, counter,theta,msg, set_position,set_yaw,wn
+    global r, counter,theta,msg, set_position,set_yaw,wn,setvel
     
     print 'looping:', counter
 
     if counter < 500000 and counter > 450000:
     # random fly
         
-        if counter % 200 == 0:
-            set_position.x = 0
-            set_position.y =0
-            set_position.z = 1
-            set_yaw = 0
-        print "random fly ",'X:',set_position.x,'Y:',set_position.y,'Z:',set_position.z
+        if counter % 1 == 0:
+            setvel.x = 0
+            setvel.y = 0
+            setvel.z += 0.001
+        print "vel fly ",'set: vel_x',setvel.x, 'set: vel_y',setvel.y, 'set: vel_z',setvel.z
         msg = PositionTarget(coordinate_frame=PositionTarget.FRAME_LOCAL_NED,
-                                type_mask=PositionTarget.IGNORE_VX + PositionTarget.IGNORE_VY + PositionTarget.IGNORE_VZ +
-                               PositionTarget.IGNORE_AFX + PositionTarget.IGNORE_AFY + PositionTarget.IGNORE_AFZ +
-                                        PositionTarget.IGNORE_YAW_RATE,
-                                position=set_position, 
-                                yaw = set_yaw )
+                             type_mask=PositionTarget.IGNORE_PX + PositionTarget.IGNORE_PY + PositionTarget.IGNORE_PZ +
+                                       PositionTarget.IGNORE_AFX + PositionTarget.IGNORE_AFY + PositionTarget.IGNORE_AFZ +
+                                       PositionTarget.IGNORE_YAW + PositionTarget.IGNORE_YAW_RATE,
+                             velocity=setvel )
         stamp = rospy.get_rostime()
         msg.header.stamp = stamp
         position_pub.publish(msg)
+
 
     if counter == 0:
         print 'Flying test over hold still at 1 1 1'

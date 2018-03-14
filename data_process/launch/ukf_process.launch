@@ -1,10 +1,10 @@
 <launch>
 
 
-  <node pkg="data_process" type="data_process_node.py" name="data_process_node" >
+  <node pkg="data_process" type="data_process_node.py" name="data_process_node" output="screen">
   </node>
 
-  <node pkg="data_process" type="ukf_process_node.py" name="ukf_process_node" >
+  <node pkg="data_process" type="ukf_process_node.py" name="ukf_process_node" output="screen">
   </node>
 
 
